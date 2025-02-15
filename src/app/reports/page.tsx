@@ -13,10 +13,13 @@ export default function ReportsPage() {
   const [startDateFrom, setStartDateFrom] = useState("");
   const [startDateTo, setStartDateTo] = useState("");
   const [reportData, setReportData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch dos dados do relatório
   const fetchReports = async () => {
     try {
+      setReportData(null); 
+      setIsLoading(true);
+
       const token = localStorage.getItem("token");
       const response = await api.get("/reports/projects", {
         headers: { Authorization: `Bearer ${token}` },
@@ -29,40 +32,43 @@ export default function ReportsPage() {
     } catch (error) {
       toast.error("Erro ao buscar relatório.");
       console.error("Erro ao buscar relatório", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Fetch inicial ao carregar a página
   useEffect(() => {
     fetchReports();
   }, []);
 
-  // Configuração do gráfico de projetos x status
   const projectStatusData = {
     labels: ["Planejado", "Em Andamento", "Concluído"],
     datasets: [
       {
-        data: [
-          reportData?.projects_by_status["planejado"] || 0,
-          reportData?.projects_by_status["em andamento"] || 0,
-          reportData?.projects_by_status["concluído"] || 0,
-        ],
+        data: reportData
+          ? [
+              reportData.projects_by_status["planejado"] || 0,
+              reportData.projects_by_status["em andamento"] || 0,
+              reportData.projects_by_status["concluído"] || 0,
+            ]
+          : [0, 0, 0],
         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
         hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
       },
     ],
   };
 
-  // Configuração do gráfico de tarefas x status
   const taskStatusData = {
     labels: ["Pendente", "Em Andamento", "Concluída"],
     datasets: [
       {
-        data: [
-          reportData?.tasks_by_status["pendente"] || 0,
-          reportData?.tasks_by_status["em andamento"] || 0,
-          reportData?.tasks_by_status["concluída"] || 0,
-        ],
+        data: reportData
+          ? [
+              reportData.tasks_by_status["pendente"] || 0,
+              reportData.tasks_by_status["em andamento"] || 0,
+              reportData.tasks_by_status["concluída"] || 0,
+            ]
+          : [0, 0, 0],
         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
         hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
       },
@@ -73,7 +79,7 @@ export default function ReportsPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Relatórios</h1>
 
-      {/* Filtros de Data */}
+      {/* Filtros */}
       <div className="mb-6 p-4 bg-white shadow-md rounded">
         <h2 className="text-lg font-bold mb-4">Filtros</h2>
         <div className="flex space-x-4">
@@ -105,9 +111,10 @@ export default function ReportsPage() {
       </div>
 
       {/* Gráficos */}
-      {reportData ? (
+      {isLoading ? (
+        <p className="text-center text-gray-500">Carregando relatório...</p>
+      ) : reportData ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Gráfico de Projetos x Status */}
           <div className="p-4 bg-white shadow-md rounded flex flex-col items-center">
             <h2 className="text-lg font-bold mb-4 text-center">
               Projetos por Status
@@ -117,7 +124,6 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Gráfico de Tarefas x Status */}
           <div className="p-4 bg-white shadow-md rounded flex flex-col items-center">
             <h2 className="text-lg font-bold mb-4 text-center">
               Tarefas por Status
@@ -128,7 +134,7 @@ export default function ReportsPage() {
           </div>
         </div>
       ) : (
-        <p className="text-center text-gray-500">Carregando relatório...</p>
+        <p className="text-center text-gray-500">Nenhum dado disponível.</p>
       )}
     </div>
   );
