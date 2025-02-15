@@ -16,6 +16,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 - **Listagem:** Exibição de projetos em uma tabela com suporte a paginação.
 - **Edição:** Tela para atualizar projetos, incluindo a adição e remoção de tarefas.
 - **Exclusão:** Ação com confirmação para evitar exclusões acidentais.
+- **Visualização de Endereço no Mapa:** Exibição do endereço com integração ao **Leaflet.js** e **OpenStreetMap**, além de detalhes complementares sobre o endereço.
 
 ### **1.3. Relatórios**
 - Tela com gráficos de pizza (usando `react-chartjs-2`) para exibir relatórios de projetos e tarefas por status.
@@ -41,6 +42,8 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 | `react-hot-toast` | ^2.x         | Para exibição de notificações no sistema.  |
 | `react-chartjs-2` | ^5.x         | Wrapper para integração com Chart.js.      |
 | `chart.js`        | ^4.x         | Biblioteca para gráficos no relatório.     |
+| `leaflet`         | ^1.9.x       | Biblioteca de mapas para renderização do endereço. |
+| `react-leaflet`   | ^4.x         | Wrapper React para Leaflet.js.             |
 
 ---
 
@@ -67,9 +70,10 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 
    ```env
    NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+   NEXT_PUBLIC_OPENCAGE_API_KEY=SUA_API_KEY
    ```
 
-   Substitua a URL pelo endpoint do backend, caso esteja em outro servidor.
+   Substitua a URL pelo endpoint do backend e inclua sua chave da API do OpenCage.
 
 4. **Inicie o Servidor de Desenvolvimento**
 
@@ -104,6 +108,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
          - "3000:3000"
        environment:
          NEXT_PUBLIC_API_URL: http://127.0.0.1:8000/api
+         NEXT_PUBLIC_OPENCAGE_API_KEY: SUA_API_KEY
        volumes:
          - .:/app
          - /app/node_modules
@@ -118,8 +123,8 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 
    WORKDIR /app
 
-   COPY package.json ./
-   COPY package-lock.json ./
+   COPY package.json ./package.json
+   COPY package-lock.json ./package-lock.json
 
    RUN npm install
 
@@ -160,7 +165,11 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
    - Token JWT armazenado no `localStorage`.
    - Rotas protegidas verificam o token e redirecionam para `/login` se não for válido.
 
-5. **Notificações:**
+5. **Mapas e Geocoding:**
+   - Utilização de **Leaflet.js** e **OpenStreetMap** para renderização do mapa.
+   - API do **OpenCage** para geocodificação de endereços, garantindo maior precisão.
+
+6. **Notificações:**
    - `react-hot-toast` para exibição de mensagens de sucesso e erro de forma centralizada.
 
 ---
@@ -187,3 +196,5 @@ project-management-front/
 ├── tailwind.config.js          # Configuração do TailwindCSS
 └── README.md                   # Documentação do frontend
 ```
+
+---
