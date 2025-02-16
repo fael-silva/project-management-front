@@ -17,8 +17,8 @@ export default function EditProjectPage() {
   const [project, setProject] = useState<any>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [tasksToRemove, setTasksToRemove] = useState<number[]>([]);
-  const [taskToDelete, setTaskToDelete] = useState<number | null>(null); // Controla a tarefa a ser excluída
-  const [isTaskDeleteModalOpen, setIsTaskDeleteModalOpen] = useState(false); // Controla a exibição da modal de exclusão de tarefa
+  const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
+  const [isTaskDeleteModalOpen, setIsTaskDeleteModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("planejado");
@@ -46,7 +46,7 @@ export default function EditProjectPage() {
         setStatus(projectData.status);
 
         if (projectData.address.cep) {
-          setCep(projectData.address.cep);
+          setCep(projectData.address.cep.replace("-", ""));
           setIsCepValid(true);
           setCepData({
             localidade: projectData.address.localidade,
