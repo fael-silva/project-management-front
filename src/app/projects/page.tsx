@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
@@ -15,7 +16,9 @@ import "leaflet/dist/leaflet.css";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
 
+// Leaflet Dynamic Imports
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
@@ -27,11 +30,13 @@ export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [latitude, setLatitude] = useState(-23.55052); 
-  const [longitude, setLongitude] = useState(-46.633308); 
+  const [latitude, setLatitude] = useState(-23.55052);
+  const [longitude, setLongitude] = useState(-46.633308);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Controla a modal de exclusão
+  const [projectToDelete, setProjectToDelete] = useState<number | null>(null); // ID do projeto a ser excluído
   const router = useRouter();
 
   useEffect(() => {
@@ -44,7 +49,6 @@ export default function ProjectsPage() {
           return;
         }
 
-        // Obter o ID do usuário logado
         const userResponse = await api.get("/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -103,19 +107,27 @@ export default function ProjectsPage() {
     setIsAddressModalOpen(true);
   };
 
-  const handleDelete = async (projectId: number) => {
-    if (confirm("Tem certeza que deseja excluir este projeto?")) {
-      try {
-        const token = localStorage.getItem("token");
-        await api.delete(`/projects/${projectId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        toast.success("Projeto excluído com sucesso!");
-        setProjects(projects.filter((project: any) => project.id !== projectId));
-      } catch (error) {
-        toast.error("Erro ao excluir projeto.");
-        console.error("Erro ao excluir projeto", error);
-      }
+  const openDeleteModal = (projectId: number) => {
+    setProjectToDelete(projectId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!projectToDelete) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete(`/projects/${projectToDelete}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Projeto excluído com sucesso!");
+      setProjects(projects.filter((project: any) => project.id !== projectToDelete));
+    } catch (error) {
+      toast.error("Erro ao excluir projeto.");
+      console.error("Erro ao excluir projeto", error);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setProjectToDelete(null);
     }
   };
 
@@ -174,15 +186,14 @@ export default function ProjectsPage() {
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   } px-2 py-1 rounded mr-2`}
                   onClick={() => router.push(`/projects/edit/${project.id}`)}
-                  disabled={project.user_id !== currentUserId} 
-                  data-tooltip-id={`tooltip-edit-${project.id}`} 
+                  disabled={project.user_id !== currentUserId}
+                  data-tooltip-id={`tooltip-edit-${project.id}`}
                   data-tooltip-content={
                     project.user_id !== currentUserId ? "Este projeto pertence a outro usuário" : ""
-                  } 
+                  }
                 >
                   <PencilIcon className="h-5 w-5" />
                 </button>
-                {/* Tooltip para o botão Editar */}
                 <Tooltip id={`tooltip-edit-${project.id}`} place="top" effect="solid" />
 
                 {/* Botão Excluir */}
@@ -192,16 +203,15 @@ export default function ProjectsPage() {
                       ? "bg-red-500 text-white hover:bg-red-600"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   } px-2 py-1 rounded`}
-                  onClick={() => handleDelete(project.id)}
-                  disabled={project.user_id !== currentUserId} 
-                  data-tooltip-id={`tooltip-delete-${project.id}`} 
+                  onClick={() => openDeleteModal(project.id)}
+                  disabled={project.user_id !== currentUserId}
+                  data-tooltip-id={`tooltip-delete-${project.id}`}
                   data-tooltip-content={
                     project.user_id !== currentUserId ? "Este projeto pertence a outro usuário" : ""
-                  } 
+                  }
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
-                {/* Tooltip para o botão Excluir */}
                 <Tooltip id={`tooltip-delete-${project.id}`} place="top" effect="solid" />
               </td>
             </tr>
@@ -228,6 +238,30 @@ export default function ProjectsPage() {
         </button>
       </div>
 
+      {/* Modal de Exclusão */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <p>Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.</p>
+          <DialogFooter className="mt-4">
+            <Button
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleDelete}
+              className="bg-red-500 text-white px-4 py-2 rounded"
+            >
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Modal de Endereço */}
       <Dialog open={isAddressModalOpen} onOpenChange={setIsAddressModalOpen}>
         <DialogContent>
@@ -238,13 +272,11 @@ export default function ProjectsPage() {
             <div className="flex flex-col md:flex-row h-auto space-y-4 md:space-y-0 md:space-x-4">
               {/* Mapa */}
               <div className="w-full md:w-1/2 h-[400px]">
-                {/* @ts-ignore */}
                 <MapContainer
                   center={[latitude, longitude]}
                   zoom={13}
                   className="h-full w-full rounded"
                 >
-                  {/* @ts-ignore */}
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

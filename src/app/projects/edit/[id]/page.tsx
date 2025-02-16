@@ -4,15 +4,29 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/services/api";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 
 export default function EditProjectPage() {
-  const [project, setProject] = useState<any>(null); // Dados do projeto
-  const [tasks, setTasks] = useState<any[]>([]); // Tarefas
-  const [tasksToRemove, setTasksToRemove] = useState<number[]>([]); // IDs das tarefas a remover
+  const [project, setProject] = useState<any>(null);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasksToRemove, setTasksToRemove] = useState<number[]>([]);
+  const [taskToDelete, setTaskToDelete] = useState<number | null>(null); // Controla a tarefa a ser excluída
+  const [isTaskDeleteModalOpen, setIsTaskDeleteModalOpen] = useState(false); // Controla a exibição da modal de exclusão de tarefa
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("planejado");
+  const [cep, setCep] = useState("");
+  const [cepData, setCepData] = useState<any>(null);
+  const [isCepValid, setIsCepValid] = useState(false);
+  const [isLoadingCep, setIsLoadingCep] = useState(false);
+  const [cepError, setCepError] = useState("");
 
   const router = useRouter();
   const { id } = useParams();
@@ -25,10 +39,24 @@ export default function EditProjectPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const projectData = response.data;
+
         setProject(projectData);
         setName(projectData.name);
         setDescription(projectData.description);
         setStatus(projectData.status);
+
+        if (projectData.address.cep) {
+          setCep(projectData.address.cep);
+          setIsCepValid(true);
+          setCepData({
+            localidade: projectData.address.localidade,
+            uf: projectData.address.uf,
+          });
+        } else {
+          setCep("");
+          setIsCepValid(false);
+        }
+
         setTasks(projectData.tasks || []);
       } catch (error) {
         toast.error("Erro ao buscar o projeto.");
@@ -37,6 +65,25 @@ export default function EditProjectPage() {
     };
     fetchProject();
   }, [id]);
+
+  // Função para validar o CEP
+  const validateCep = async () => {
+    setIsLoadingCep(true);
+    setCepError("");
+    try {
+      const token = localStorage.getItem("token");
+      const response = await api.get(`/cep/${cep}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCepData(response.data);
+      setIsCepValid(true);
+    } catch (error) {
+      setCepError("CEP inválido ou não encontrado.");
+      setIsCepValid(false);
+    } finally {
+      setIsLoadingCep(false);
+    }
+  };
 
   const handleTaskChange = (
     index: number,
@@ -52,17 +99,34 @@ export default function EditProjectPage() {
     setTasks([...tasks, { title: "", description: "", status: "pendente" }]);
   };
 
-  const handleRemoveTask = (index: number, taskId?: number) => {
-    if (taskId) {
-      setTasksToRemove([...tasksToRemove, taskId]);
+  const openTaskDeleteModal = (taskId: number) => {
+    setTaskToDelete(taskId);
+    setIsTaskDeleteModalOpen(true);
+  };
+
+  const handleConfirmRemoveTask = () => {
+    if (!taskToDelete) return;
+
+    const taskIndex = tasks.findIndex((task) => task.id === taskToDelete);
+    if (taskIndex >= 0) {
+      if (taskToDelete) {
+        setTasksToRemove([...tasksToRemove, taskToDelete]);
+      }
+      const updatedTasks = [...tasks];
+      updatedTasks.splice(taskIndex, 1);
+      setTasks(updatedTasks);
     }
-    const updatedTasks = [...tasks];
-    updatedTasks.splice(index, 1);
-    setTasks(updatedTasks);
+
+    setIsTaskDeleteModalOpen(false);
+    setTaskToDelete(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isCepValid) {
+      toast.error("Por favor, valide o CEP antes de atualizar o projeto.");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -72,6 +136,7 @@ export default function EditProjectPage() {
           name,
           description,
           status,
+          cep,
           tasks,
           tasks_to_remove: tasksToRemove,
         },
@@ -95,7 +160,7 @@ export default function EditProjectPage() {
     <div className="p-6 flex justify-center">
       <div className="w-full max-w-3xl space-y-8">
         <h1 className="text-2xl font-bold text-center">Editar Projeto</h1>
-        
+
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Dados do Projeto */}
@@ -114,6 +179,25 @@ export default function EditProjectPage() {
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-2 border rounded"
             ></textarea>
+            <div>
+              <input
+                type="text"
+                placeholder="CEP"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
+                onBlur={validateCep}
+                className={`w-full p-2 border rounded ${
+                  cepError ? "border-red-500" : ""
+                }`}
+              />
+              {isLoadingCep && <p className="text-gray-500">Validando CEP...</p>}
+              {cepError && <p className="text-red-500">{cepError}</p>}
+              {isCepValid && (
+                <p className="text-green-500">
+                  CEP válido: {cepData?.localidade} - {cepData?.uf}
+                </p>
+              )}
+            </div>
             <div>
               <label className="block font-bold mb-2">Status</label>
               <select
@@ -168,7 +252,7 @@ export default function EditProjectPage() {
                 {tasks.length > 1 && (
                   <Button
                     type="button"
-                    onClick={() => handleRemoveTask(index, task.id)}
+                    onClick={() => openTaskDeleteModal(task.id)}
                     className="bg-red-500 text-white px-4 py-2 rounded mt-2"
                   >
                     Remover Tarefa
@@ -196,6 +280,30 @@ export default function EditProjectPage() {
           </div>
         </form>
       </div>
+
+      {/* Modal de Exclusão de Tarefa */}
+      <Dialog open={isTaskDeleteModalOpen} onOpenChange={setIsTaskDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <p>Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.</p>
+          <DialogFooter>
+            <Button
+              onClick={() => setIsTaskDeleteModalOpen(false)}
+              className="bg-gray-500 text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmRemoveTask}
+              className="bg-red-500 text-white"
+            >
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
