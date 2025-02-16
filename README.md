@@ -14,6 +14,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 ### **1.2. Gerenciamento de Projetos**
 - **Cadastro:** Formulário com validação de CEP e criação dinâmica de tarefas.
 - **Listagem:** Exibição de projetos em uma tabela com suporte a paginação.
+  - Botões de ação (`Editar`, `Excluir`) desabilitados para projetos pertencentes a outros usuários, exibindo tooltip informativa.
 - **Edição:** Tela para atualizar projetos, incluindo a adição e remoção de tarefas.
 - **Exclusão:** Ação com confirmação para evitar exclusões acidentais.
 - **Visualização de Endereço no Mapa:** Exibição do endereço com integração ao **Leaflet.js** e **OpenStreetMap**, além de detalhes complementares sobre o endereço.
@@ -21,6 +22,10 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 ### **1.3. Relatórios**
 - Tela com gráficos de pizza (usando `react-chartjs-2`) para exibir relatórios de projetos e tarefas por status.
 - Filtros de data para customizar os dados exibidos no relatório.
+
+### **1.4. Navegação**
+- Ícones visuais em menus e botões para facilitar a navegação e melhorar a experiência do usuário.
+- Página inicial com links rápidos para cadastro, listagem e relatórios.
 
 ---
 
@@ -44,6 +49,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 | `chart.js`        | ^4.x         | Biblioteca para gráficos no relatório.     |
 | `leaflet`         | ^1.9.x       | Biblioteca de mapas para renderização do endereço. |
 | `react-leaflet`   | ^4.x         | Wrapper React para Leaflet.js.             |
+| `@heroicons/react`| ^2.x         | Ícones para navegação e ações no sistema.  |
 
 ---
 
@@ -172,6 +178,9 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 6. **Notificações:**
    - `react-hot-toast` para exibição de mensagens de sucesso e erro de forma centralizada.
 
+7. **Navegação com Ícones:**
+   - Ícones da biblioteca **Heroicons** foram integrados para melhorar a usabilidade e facilitar a identificação das ações disponíveis.
+
 ---
 
 ## **5. Estrutura de Pastas**
@@ -196,5 +205,3 @@ project-management-front/
 ├── tailwind.config.js          # Configuração do TailwindCSS
 └── README.md                   # Documentação do frontend
 ```
-
----
