@@ -12,6 +12,15 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "@/services/api";
 
+// Importação dos ícones
+import {
+  HomeIcon,
+  PlusIcon,
+  ListBulletIcon,
+  ChartPieIcon,
+  ArrowLeftOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+
 export default function Navbar() {
   const [userName, setUserName] = useState<string | null>(null); // Armazena o nome do usuário
   const router = useRouter();
@@ -50,7 +59,8 @@ export default function Navbar() {
     <nav className="bg-gray-800 text-white shadow-md">
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         {/* Título do sistema */}
-        <h1 className="text-xl font-bold">
+        <h1 className="text-xl font-bold flex items-center space-x-2">
+          <HomeIcon className="h-6 w-6 text-blue-400" />
           <Link href="/home">Project Management</Link>
         </h1>
 
@@ -59,22 +69,34 @@ export default function Navbar() {
           <NavigationMenuList className="flex space-x-4">
             <NavigationMenuItem>
               <Link href="/home" passHref legacyBehavior>
-                <NavigationMenuLink className="hover:underline">Home</NavigationMenuLink>
+                <NavigationMenuLink className="hover:underline flex items-center space-x-2">
+                  <HomeIcon className="h-5 w-5" />
+                  <span>Home</span>
+                </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link href="/projects/create" passHref legacyBehavior>
-                <NavigationMenuLink className="hover:underline">Cadastro</NavigationMenuLink>
+                <NavigationMenuLink className="hover:underline flex items-center space-x-2">
+                  <PlusIcon className="h-5 w-5" />
+                  <span>Cadastro</span>
+                </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link href="/projects" passHref legacyBehavior>
-                <NavigationMenuLink className="hover:underline">Listagem</NavigationMenuLink>
+                <NavigationMenuLink className="hover:underline flex items-center space-x-2">
+                  <ListBulletIcon className="h-5 w-5" />
+                  <span>Listagem</span>
+                </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link href="/reports" passHref legacyBehavior>
-                <NavigationMenuLink className="hover:underline">Relatórios</NavigationMenuLink>
+                <NavigationMenuLink className="hover:underline flex items-center space-x-2">
+                  <ChartPieIcon className="h-5 w-5" />
+                  <span>Relatórios</span>
+                </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
@@ -85,9 +107,10 @@ export default function Navbar() {
           {userName && <span className="text-sm text-gray-300">Bem-vindo, {userName}</span>}
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center space-x-2"
           >
-            Logout
+            <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+            <span>Logout</span>
           </button>
         </div>
       </div>

@@ -11,9 +11,12 @@ import {
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import "leaflet/dist/leaflet.css"; // Leaflet styles
+import "leaflet/dist/leaflet.css";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
+import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { format } from "date-fns";
 
-// Importação dinâmica do Leaflet
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
@@ -21,11 +24,12 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { 
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [latitude, setLatitude] = useState(-23.55052); // Default latitude
-  const [longitude, setLongitude] = useState(-46.633308); // Default longitude
+  const [latitude, setLatitude] = useState(-23.55052); 
+  const [longitude, setLongitude] = useState(-46.633308); 
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
@@ -40,6 +44,12 @@ export default function ProjectsPage() {
           window.location.href = "/login";
           return;
         }
+
+        // Obter o ID do usuário logado
+        const userResponse = await api.get("/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCurrentUserId(userResponse.data.id);
 
         const response = await api.get(`/projects?per_page=10&page=${currentPage}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -117,7 +127,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Meus Projetos</h1>
+      <h1 className="text-2xl font-bold mb-4">Projetos</h1>
       <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr className="bg-gray-200">
@@ -134,36 +144,66 @@ export default function ProjectsPage() {
             <tr key={project.id}>
               <td className="border border-gray-300 p-2">{project.name}</td>
               <td className="border border-gray-300 p-2">{project.description}</td>
-              <td className="border border-gray-300 p-2">{project.start_date}</td>
-              <td className="border border-gray-300 p-2">
+              <td className="border border-gray-300 p-2 text-center">
+                {(() => {
+                  const [year, month, day] = project.start_date.split("-");
+                  return `${day}/${month}/${year}`;
+                })()}
+              </td>
+              <td className="border border-gray-300 p-2 text-center">
                 <button
-                  className="text-blue-500 underline"
+                  className="text-blue-500"
                   onClick={() => openAddressModal(project.address)}
                 >
-                  Ver Endereço
+                  <EyeIcon className="h-5 w-5" />
                 </button>
               </td>
-              <td className="border border-gray-300 p-2">
+              <td className="border border-gray-300 p-2 text-center">
                 <button
-                  className="text-blue-500 underline"
+                  className="text-blue-500"
                   onClick={() => openTasksModal(project.tasks)}
                 >
-                  Ver Tarefas
+                  <EyeIcon className="h-5 w-5" />
                 </button>
               </td>
-              <td className="border border-gray-300 p-2">
+              <td className="border border-gray-300 p-2 text-center">
+                {/* Botão Editar */}
                 <button
-                  className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                  className={`${
+                    project.user_id === currentUserId
+                      ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  } px-2 py-1 rounded mr-2`}
                   onClick={() => router.push(`/projects/edit/${project.id}`)}
+                  disabled={project.user_id !== currentUserId} 
+                  data-tooltip-id={`tooltip-edit-${project.id}`} 
+                  data-tooltip-content={
+                    project.user_id !== currentUserId ? "Este projeto pertence a outro usuário" : ""
+                  } 
                 >
-                  Editar
+                  <PencilIcon className="h-5 w-5" />
                 </button>
+                {/* Tooltip para o botão Editar */}
+                <Tooltip id={`tooltip-edit-${project.id}`} place="top" effect="solid" />
+
+                {/* Botão Excluir */}
                 <button
-                  className="bg-red-500 text-white px-2 py-1 rounded"
+                  className={`${
+                    project.user_id === currentUserId
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  } px-2 py-1 rounded`}
                   onClick={() => handleDelete(project.id)}
+                  disabled={project.user_id !== currentUserId} 
+                  data-tooltip-id={`tooltip-delete-${project.id}`} 
+                  data-tooltip-content={
+                    project.user_id !== currentUserId ? "Este projeto pertence a outro usuário" : ""
+                  } 
                 >
-                  Excluir
+                  <TrashIcon className="h-5 w-5" />
                 </button>
+                {/* Tooltip para o botão Excluir */}
+                <Tooltip id={`tooltip-delete-${project.id}`} place="top" effect="solid" />
               </td>
             </tr>
           ))}
@@ -234,7 +274,6 @@ export default function ProjectsPage() {
           )}
         </DialogContent>
       </Dialog>
-
 
       {/* Modal de Tarefas */}
       <Dialog open={isTasksModalOpen} onOpenChange={setIsTasksModalOpen}>
