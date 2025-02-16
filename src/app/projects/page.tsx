@@ -15,7 +15,6 @@ import "leaflet/dist/leaflet.css";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { format } from "date-fns";
 
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });

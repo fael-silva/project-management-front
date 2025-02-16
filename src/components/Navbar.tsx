@@ -68,14 +68,6 @@ export default function Navbar() {
         <NavigationMenu>
           <NavigationMenuList className="flex space-x-4">
             <NavigationMenuItem>
-              <Link href="/home" passHref legacyBehavior>
-                <NavigationMenuLink className="hover:underline flex items-center space-x-2">
-                  <HomeIcon className="h-5 w-5" />
-                  <span>Home</span>
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
               <Link href="/projects/create" passHref legacyBehavior>
                 <NavigationMenuLink className="hover:underline flex items-center space-x-2">
                   <PlusIcon className="h-5 w-5" />
