@@ -4,14 +4,14 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 
 ---
 
-## **1. Funcionalidades do Frontend**
+## **1️⃣ Funcionalidades do Frontend**
 
-### **1.1. Autenticação**
+### **🔐 1.1. Autenticação**
 - Tela de login com validação de credenciais utilizando JWT.
 - Armazenamento do token no `localStorage` para persistência de sessão.
 - Botão de logout com redirecionamento automático para a página de login.
 
-### **1.2. Gerenciamento de Projetos**
+### **📂 1.2. Gerenciamento de Projetos**
 - **Cadastro:** Formulário com validação de CEP e criação dinâmica de tarefas.
 - **Listagem:** Exibição de projetos em uma tabela com suporte a paginação.
   - Botões de ação (`Editar`, `Excluir`) desabilitados para projetos pertencentes a outros usuários, exibindo tooltip informativa.
@@ -19,24 +19,24 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 - **Exclusão:** Ação com confirmação para evitar exclusões acidentais.
 - **Visualização de Endereço no Mapa:** Exibição do endereço com integração ao **Leaflet.js** e **OpenStreetMap**, além de detalhes complementares sobre o endereço.
 
-### **1.3. Relatórios**
+### **📊 1.3. Relatórios**
 - Tela com gráficos de pizza (usando `react-chartjs-2`) para exibir relatórios de projetos e tarefas por status.
 - Filtros de data para customizar os dados exibidos no relatório.
 
-### **1.4. Navegação**
+### **📌 1.4. Navegação**
 - Ícones visuais em menus e botões para facilitar a navegação e melhorar a experiência do usuário.
 - Página inicial com links rápidos para cadastro, listagem e relatórios.
 
 ---
 
-## **2. Requisitos e Dependências**
+## **2️⃣ Requisitos e Dependências**
 
-### **2.1. Requisitos**
+### **📌 2.1. Requisitos**
 - **Node.js:** >= 16.x
 - **NPM ou Yarn:** Gerenciador de pacotes.
 - Backend configurado e rodando ([veja o README do backend](../README.md)).
 
-### **2.2. Dependências**
+### **📦 2.2. Dependências**
 | Dependência        | Versão       | Descrição                                  |
 |--------------------|--------------|------------------------------------------|
 | `next`            | ^15.1.7      | Framework para React com suporte a SSR e SSG. |
@@ -53,109 +53,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 
 ---
 
-## **3. Instruções para Rodar o Projeto**
-
-### **3.1. Rodar Localmente**
-
-1. **Clone o Repositório**
-
-   ```bash
-   git clone https://github.com/seu-repositorio/project-management-front.git
-   cd project-management-front
-   ```
-
-2. **Instale as Dependências**
-
-   ```bash
-   npm install
-   ```
-
-3. **Configure as Variáveis de Ambiente**
-
-   Crie um arquivo `.env.local` na raiz do projeto com o seguinte conteúdo:
-
-   ```env
-   NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
-   NEXT_PUBLIC_OPENCAGE_API_KEY=SUA_API_KEY
-   ```
-
-   Substitua a URL pelo endpoint do backend e inclua sua chave da API do OpenCage.
-
-4. **Inicie o Servidor de Desenvolvimento**
-
-   ```bash
-   npm run dev
-   ```
-
-5. **Acesse o Frontend**
-
-   O sistema estará disponível em [http://localhost:3000](http://localhost:3000).
-
----
-
-### **3.2. Rodar com Docker**
-
-1. **Instale o Docker e o Docker Compose**
-
-   Certifique-se de que o Docker e o Docker Compose estão instalados na sua máquina.
-
-2. **Crie o Arquivo `docker-compose.yml`**
-
-   Adicione o seguinte conteúdo ao arquivo `docker-compose.yml` na raiz do projeto:
-
-   ```yaml
-   version: "3.8"
-   services:
-     frontend:
-       build:
-         context: .
-         dockerfile: Dockerfile
-       ports:
-         - "3000:3000"
-       environment:
-         NEXT_PUBLIC_API_URL: http://127.0.0.1:8000/api
-         NEXT_PUBLIC_OPENCAGE_API_KEY: SUA_API_KEY
-       volumes:
-         - .:/app
-         - /app/node_modules
-   ```
-
-3. **Crie o Arquivo `Dockerfile`**
-
-   Adicione o seguinte conteúdo ao arquivo `Dockerfile` na raiz do projeto:
-
-   ```dockerfile
-   FROM node:16-alpine
-
-   WORKDIR /app
-
-   COPY package.json ./package.json
-   COPY package-lock.json ./package-lock.json
-
-   RUN npm install
-
-   COPY . .
-
-   EXPOSE 3000
-
-   CMD ["npm", "run", "dev"]
-   ```
-
-4. **Suba o Container**
-
-   Execute o seguinte comando para iniciar o container:
-
-   ```bash
-   docker-compose up -d
-   ```
-
-5. **Acesse o Frontend**
-
-   O sistema estará disponível em [http://localhost:3000](http://localhost:3000).
-
----
-
-## **4. Decisões Técnicas**
+## **3️⃣ Decisões Técnicas**
 
 1. **Framework:**
    - Utilizamos **Next.js** para aproveitar sua capacidade de renderização híbrida e facilitar a criação de rotas dinâmicas.
@@ -183,7 +81,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 
 ---
 
-## **5. Estrutura de Pastas**
+## **4️⃣ Estrutura de Pastas**
 
 ```plaintext
 project-management-front/
@@ -205,3 +103,20 @@ project-management-front/
 ├── tailwind.config.js          # Configuração do TailwindCSS
 └── README.md                   # Documentação do frontend
 ```
+
+---
+
+## **5️⃣ Como Rodar a Aplicação Completa (Frontend + Backend)**  
+
+Para rodar a aplicação completa (frontend + backend), siga as instruções disponíveis no README do backend, **seção 6**:  
+
+🔗 **[Acesse as instruções aqui](https://github.com/fael-silva/projectManagement)**  
+
+Lá você encontrará todos os detalhes sobre como:  
+✅ Clonar os repositórios corretamente.  
+✅ Ajustar o `docker-compose-project.yml`.  
+✅ Subir os containers do backend, banco e frontend.  
+✅ Acessar a aplicação em execução.   
+
+---
+
