@@ -66,7 +66,6 @@ export default function EditProjectPage() {
     fetchProject();
   }, [id]);
 
-  // Função para validar o CEP
   const validateCep = async () => {
     setIsLoadingCep(true);
     setCepError("");
@@ -145,7 +144,7 @@ export default function EditProjectPage() {
         }
       );
       toast.success("Projeto atualizado com sucesso!");
-      router.push("/projects"); // Redireciona para a listagem
+      router.push("/projects");
     } catch (error) {
       toast.error("Erro ao atualizar o projeto.");
       console.error(error);

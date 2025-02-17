@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "react-hot-toast"; // Para notificações
-import NavbarWrapper from "@/components/NavbarWrapper"; // Importa o wrapper do Navbar
+import { Toaster } from "react-hot-toast";
+import NavbarWrapper from "@/components/NavbarWrapper"; 
 import "./globals.css";
 
 const geistSans = Geist({
