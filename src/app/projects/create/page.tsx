@@ -1,38 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Para redirecionamento
+import { useRouter } from "next/navigation"; 
 import api from "@/services/api";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast"; // Importa o toast
+import toast from "react-hot-toast";
+import { CepData } from "../interfaces/Data";
 
 export default function CreateProjectPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [cep, setCep] = useState("");
-  const [cepData, setCepData] = useState(null);
+  const [cepData, setCepData] = useState<CepData | null>(null);
   const [tasks, setTasks] = useState([{ title: "", description: "" }]);
   const [isCepValid, setIsCepValid] = useState(false);
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [cepError, setCepError] = useState("");
-  const router = useRouter(); // Inicializa o router para redirecionamento
+  const router = useRouter();
 
-  // Função para validar o CEP
   const validateCep = async () => {
     setIsLoadingCep(true);
     setCepError("");
     try {
       const token = localStorage.getItem("token");
-      const response = await api.get(`/cep/${cep}`, {
+      const response = await api.get<CepData>(`/cep/${cep}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setCepData(response.data);
-      setIsCepValid(true);
+
+      if (response.data.localidade && response.data.uf) {
+        setCepData(response.data);
+        setIsCepValid(true);
+      } else {
+        throw new Error("CEP inválido ou não encontrado.");
+      }
     } catch (error) {
       setCepError("CEP inválido ou não encontrado.");
       setIsCepValid(false);
+      setCepData(null);
     } finally {
       setIsLoadingCep(false);
     }
@@ -50,7 +56,7 @@ export default function CreateProjectPage() {
 
   const handleTaskChange = (
     index: number,
-    field: keyof typeof tasks[number],
+    field: keyof (typeof tasks)[number],
     value: string
   ) => {
     const updatedTasks = [...tasks];
@@ -77,7 +83,7 @@ export default function CreateProjectPage() {
         }
       );
       toast.success("Projeto cadastrado com sucesso!");
-      router.push("/projects"); // Redireciona para a tela de listagem
+      router.push("/projects");
     } catch (error) {
       console.error("Erro ao cadastrar projeto:", error);
       toast.error("Erro ao cadastrar projeto. Tente novamente.");
@@ -120,9 +126,9 @@ export default function CreateProjectPage() {
               />
               {isLoadingCep && <p className="text-gray-500">Validando CEP...</p>}
               {cepError && <p className="text-red-500">{cepError}</p>}
-              {isCepValid && (
+              {isCepValid && cepData && (
                 <p className="text-green-500">
-                  CEP válido: {cepData?.localidade} - {cepData?.uf}
+                  CEP válido: {cepData.localidade} - {cepData.uf}
                 </p>
               )}
             </div>

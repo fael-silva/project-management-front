@@ -11,32 +11,34 @@ import {
 } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
+import { CepData } from "./interfaces/Data";
+import { TaskData } from "./interfaces/Data";
+import { ProjectData } from "./interfaces/Data";
+import dynamic from "next/dynamic";
 
-// Leaflet Dynamic Imports
-const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
+const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import("react-leaflet").then(mod => mod.Popup), { ssr: false });
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<ProjectData[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [selectedAddress, setSelectedAddress] = useState<CepData | null>(null);
   const [latitude, setLatitude] = useState(-23.55052);
   const [longitude, setLongitude] = useState(-46.633308);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [selectedTasks, setSelectedTasks] = useState<TaskData[]>([]);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Controla a modal de exclusão
-  const [projectToDelete, setProjectToDelete] = useState<number | null>(null); // ID do projeto a ser excluído
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); 
+  const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function ProjectsPage() {
         const token = localStorage.getItem("token");
         if (!token) {
           toast.error("Token de autenticação ausente. Por favor, faça login.");
-          window.location.href = "/login";
+          router.push('/login');
           return;
         }
 
@@ -59,11 +61,11 @@ export default function ProjectsPage() {
         });
         setProjects(response.data.data);
         setTotalPages(response.data.last_page);
-      } catch (error) {
+      } catch (error: any) {
         if (error.response?.status === 401) {
           toast.error("Sua sessão expirou. Por favor, faça login novamente.");
           localStorage.removeItem("token");
-          window.location.href = "/login";
+          router.push('/login');
         } else {
           toast.error("Erro ao buscar projetos.");
           console.error("Erro ao buscar projetos", error);
@@ -73,7 +75,7 @@ export default function ProjectsPage() {
     fetchProjects();
   }, [currentPage]);
 
-  const fetchCoordinates = async (address: any) => {
+  const fetchCoordinates = async (address: CepData) => {
     try {
       const query = `${address.localidade}, ${address.estado}, ${address.cep}`;
       const response = await fetch(
@@ -95,7 +97,7 @@ export default function ProjectsPage() {
     }
   };
 
-  const openAddressModal = async (address: any) => {
+  const openAddressModal = async (address: CepData) => {
     setSelectedAddress(address);
 
     const coordinates = await fetchCoordinates(address);
@@ -121,7 +123,7 @@ export default function ProjectsPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Projeto excluído com sucesso!");
-      setProjects(projects.filter((project: any) => project.id !== projectToDelete));
+      setProjects(projects.filter((project: ProjectData) => project.id !== projectToDelete));
     } catch (error) {
       toast.error("Erro ao excluir projeto.");
       console.error("Erro ao excluir projeto", error);
@@ -131,10 +133,11 @@ export default function ProjectsPage() {
     }
   };
 
-  const openTasksModal = (tasks: any[]) => {
+  const openTasksModal = (tasks: TaskData[]) => {
     setSelectedTasks(tasks);
     setIsTasksModalOpen(true);
   };
+
 
   return (
     <div className="p-6">
@@ -151,7 +154,7 @@ export default function ProjectsPage() {
           </tr>
         </thead>
         <tbody>
-          {projects.map((project: any) => (
+          {projects.map((project: ProjectData) => (
             <tr key={project.id}>
               <td className="border border-gray-300 p-2">{project.name}</td>
               <td className="border border-gray-300 p-2">{project.description}</td>
@@ -194,7 +197,7 @@ export default function ProjectsPage() {
                 >
                   <PencilIcon className="h-5 w-5" />
                 </button>
-                <Tooltip id={`tooltip-edit-${project.id}`} place="top" effect="solid" />
+                <Tooltip id={`tooltip-edit-${project.id}`} place="top"/>
 
                 {/* Botão Excluir */}
                 <button
@@ -212,7 +215,7 @@ export default function ProjectsPage() {
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
-                <Tooltip id={`tooltip-delete-${project.id}`} place="top" effect="solid" />
+                <Tooltip id={`tooltip-delete-${project.id}`} place="top"/>
               </td>
             </tr>
           ))}
@@ -324,7 +327,7 @@ export default function ProjectsPage() {
                 </tr>
               </thead>
               <tbody>
-                {selectedTasks.map((task: any, index: number) => (
+                {selectedTasks.map((task: TaskData, index: number) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="border border-gray-300 px-4 py-2">{task.title}</td>
                     <td className="border border-gray-300 px-4 py-2">
