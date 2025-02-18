@@ -21,7 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function Navbar() {
-  const [userName, setUserName] = useState<string | null>(null); // Armazena o nome do usuário
+  const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchUserData = async () => {

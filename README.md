@@ -10,6 +10,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 - Tela de login com validação de credenciais utilizando JWT.
 - Armazenamento do token no `localStorage` para persistência de sessão.
 - Botão de logout com redirecionamento automático para a página de login.
+- Usuários são criados automaticamente via seeder no backend e podem ser gerenciados via Laravel Tinker.
 
 ### **📂 1.2. Gerenciamento de Projetos**
 - **Cadastro:** Formulário com validação de CEP e criação dinâmica de tarefas.
@@ -34,7 +35,7 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 ### **📌 2.1. Requisitos**
 - **Node.js:** >= 16.x
 - **NPM ou Yarn:** Gerenciador de pacotes.
-- Backend configurado e rodando ([veja o README do backend](../README.md)).
+- Backend configurado e rodando ([veja o README do backend](https://github.com/fael-silva/projectManagement)).
 
 ### **📦 2.2. Dependências**
 | Dependência        | Versão       | Descrição                                  |
@@ -56,7 +57,8 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 ## **3️⃣ Decisões Técnicas**
 
 1. **Framework:**
-   - Utilizamos **Next.js** para aproveitar sua capacidade de renderização híbrida e facilitar a criação de rotas dinâmicas.
+   - Utilizei **Next.js** para aproveitar sua capacidade de renderização híbrida e facilitar a criação de rotas dinâmicas.
+   - O frontend foi desenvolvido com **TypeScript**.
 
 2. **Estilo e Componentização:**
    - **TailwindCSS:** Utilizado para estilização rápida e consistente.
@@ -75,9 +77,18 @@ Frontend do sistema **Project Management**, desenvolvido em **Next.js** com inte
 
 6. **Notificações:**
    - `react-hot-toast` para exibição de mensagens de sucesso e erro de forma centralizada.
+   - **O backend dispara emails automaticamente ao concluir tarefas.**
 
 7. **Navegação com Ícones:**
    - Ícones da biblioteca **Heroicons** foram integrados para melhorar a usabilidade e facilitar a identificação das ações disponíveis.
+
+8. **Permissões de Usuário:**
+   - As permissões são controladas pelo backend usando **Spatie Laravel Permission**.
+   - Admins podem visualizar todos os projetos; usuários comuns veem apenas os próprios projetos.
+   - O frontend respeita essas permissões, desativando botões de ação para projetos de outros usuários.
+
+9. **Testes Automatizados:**
+   - Os testes automatizados foram implementados no backend para garantir a estabilidade da API.
 
 ---
 
@@ -120,3 +131,12 @@ Lá você encontrará todos os detalhes sobre como:
 
 ---
 
+## **📌 Considerações Finais**
+Caso haja qualquer erro ao rodar a aplicação, verifique os logs com:
+```bash
+docker-compose logs -f
+```
+Se precisar reiniciar completamente, use:
+```bash
+docker-compose down -v && docker-compose up --build -d
+```
